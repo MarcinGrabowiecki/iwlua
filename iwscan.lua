@@ -1,5 +1,7 @@
 #!/usr/bin/lua
 
+os.execute("reset")
+
 local ansiPrefix = string.char(27).."["
 local goto00 = ansiPrefix.."0;0H"
 local hist={}
@@ -19,9 +21,9 @@ function injectString(s,c)
 	local count=tonumber(stat[c.address.."count"])
 	local avg=math.floor(sum/count)
 	if count == 0 then avg=0 end
-	ret=ret:sub(0,min).."m"..ret:sub(min)
-	ret=ret:sub(0,avg).."a"..ret:sub(avg)
-	ret=ret:sub(0,max).."X"..ret:sub(max)
+	ret=ret:sub(0,avg).."a"..ret:sub(avg+2)
+	ret=ret:sub(0,min).."m"..ret:sub(min+2)
+	ret=ret:sub(0,max).."X"..ret:sub(max+2)
 	return ret
 end
 
@@ -63,7 +65,7 @@ end
 
 function proces()
 
-	local proc = assert (io.popen ("/sbin/iwlist scan"))
+	local proc = assert (io.popen ("/sbin/iwlist scan 2>/dev/null"))
 	local r={}
 	local tt={}
 
@@ -79,12 +81,13 @@ function proces()
 		add("essid",string.match(l,"ESSID:.(.*)."),tt)
 		add("channel",string.match(l,"Channel:(%d+)"),tt)
 		add("quality",string.match(l,"Quality=(%d+).*"),tt)
-		--	cellNum,n,cellAddr=string.match(l,"(%d+)(............)(.................)")
+		--cellNum,n,cellAddr=string.match(l,"(%d+)(............)(.................)")
 		end
 	r[#r+1] = tt
 	table.remove(r,1)
 
-	table.sort(r,function(a,b) return a.quality>b.quality end)
+	-- table.sort(r,function(a,b) return a.quality>b.quality end)
+	table.sort(r,function(a,b) return a.essid>b.essid end)
 
 	print(goto00)
 
@@ -95,13 +98,7 @@ function proces()
 			print(col(i,3)..col(c.cellnum,3)..col(c.channel,3)..col(c.essid,18)..col(c.address,18)..col(c.quality,3)..bar(c))
 		end
 	end
-
-	print(#hist)
-	
-	for i,j in pairs(stat) do
---		print(i,j)
-	end
-
+	--print(#hist)
 end
 
 for i=0,1000,1 do

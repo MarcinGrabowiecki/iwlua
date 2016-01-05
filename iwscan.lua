@@ -22,6 +22,10 @@ function bar(q)
 	return ret
 end
 
+function col(s,n)
+	return string.sub(s.."                              ",0,n)
+end
+
 function proces()
 
 	local proc = assert (io.popen ("/sbin/iwlist scan"))
@@ -46,9 +50,6 @@ function proces()
 	table.remove(r,1)
 
 
-	function col(s,n)
-		return string.sub(s.."                              ",0,n)
-	end
 
 
 	table.sort(r,function(a,b) return a.quality>b.quality end)

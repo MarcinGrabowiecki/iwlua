@@ -11,14 +11,13 @@ function add(k,v,tt)
 	tt[k]=v
 end	
 
-function bar(q)
+function bar(c)
+	local e="|"
+	local n = "-"
+	local v = tonumber(c.quality)
 	local ret=""
-	for i=0,q,1 do
-		ret=ret.."|"
-	end
-	for i=0,70-q,1 do
-		ret=ret.."-"
-	end
+	ret=ret..e:rep(v)
+	ret=ret..n:rep(70-v)
 	return ret
 end
 
@@ -78,7 +77,7 @@ function proces()
 	for i,c in pairs(r) do
 		if c.quality==nil then else
 			hist[#hist+1] = c
-			print(col(i,3)..col(c.cellnum,3)..col(c.channel,3)..col(c.essid,18)..col(c.address,18)..col(c.quality,3)..bar(tonumber(c.quality)))
+			print(col(i,3)..col(c.cellnum,3)..col(c.channel,3)..col(c.essid,18)..col(c.address,18)..col(c.quality,3)..bar(c))
 			gatherStat(c)
 		end
 	end
@@ -91,7 +90,7 @@ function proces()
 
 end
 
-for i=0,100,1 do
+for i=0,1000,1 do
 	proces()
 end
 

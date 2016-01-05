@@ -11,6 +11,11 @@ function add(k,v,tt)
 	tt[k]=v
 end	
 
+function injectString(s,r,pos)
+	ret=s:sub(0,pos)..r..s:sub(pos)
+	return ret
+end
+
 function bar(c)
 	local e="|"
 	local n = "-"
@@ -18,11 +23,11 @@ function bar(c)
 	local ret=""
 	ret=ret..e:rep(v)
 	ret=ret..n:rep(70-v)
-	return ret
+	return injectString(ret,"X",stat[c.address.."max"])
 end
 
 function col(s,n)
-	return string.sub(s.."                              ",0,n)
+	return string.sub(s.."                    ",0,n)
 end
 
 function gatherStat(c)
@@ -77,8 +82,8 @@ function proces()
 	for i,c in pairs(r) do
 		if c.quality==nil then else
 			hist[#hist+1] = c
-			print(col(i,3)..col(c.cellnum,3)..col(c.channel,3)..col(c.essid,18)..col(c.address,18)..col(c.quality,3)..bar(c))
 			gatherStat(c)
+			print(col(i,3)..col(c.cellnum,3)..col(c.channel,3)..col(c.essid,18)..col(c.address,18)..col(c.quality,3)..bar(c))
 		end
 	end
 

@@ -4,7 +4,6 @@ os.execute("reset")
 
 local ansiPrefix = string.char(27).."["
 local goto00 = ansiPrefix.."0;0H"
-local hist={}
 local stat={}
 
 
@@ -93,12 +92,10 @@ function proces()
 
 	for i,c in pairs(r) do
 		if c.quality==nil then else
-			hist[#hist+1] = c
 			gatherStat(c)
 			print(col(i,3)..col(c.cellnum,3)..col(c.channel,3)..col(c.essid,18)..col(c.address,18)..col(c.quality,3)..bar(c))
 		end
 	end
-	--print(#hist)
 end
 
 for i=0,1000,1 do

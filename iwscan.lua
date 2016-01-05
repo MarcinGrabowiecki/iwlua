@@ -3,22 +3,18 @@
 local ansiPrefix = string.char(27).."["
 local goto00 = ansiPrefix.."0;0H"
 
-
 function add(k,v,tt)
 	if v==nil then return end
 	tt[k]=v
 end	
 
-
-
 function proces()
 
-	local f = assert (io.popen ("/sbin/iwlist scan"))
+	local proc = assert (io.popen ("/sbin/iwlist scan"))
 	local r={}
 	local tt={}
-	local hist={}
 
-	for l in f:lines () do
+	for l in proc:lines () do
 		--print (l)
 		cellnum,address = string.match(l,"Cell (%d+)............(.*)")
 		if cellnum then

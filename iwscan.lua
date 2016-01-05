@@ -26,8 +26,26 @@ function col(s,n)
 	return string.sub(s.."                              ",0,n)
 end
 
-function stat(c)
+function gatherStat(c)
+	if stat[c.address.."max"]
+		then if stat[c.address.."max"]<c.quality then stat[c.address.."max"] = c.quality end
+		else stat[c.address.."max"]=c.quality
+	end
 
+	if stat[c.address.."min"]
+		then if stat[c.address.."min"]>c.quality then stat[c.address.."max"] = c.quality end
+		else stat[c.address.."min"]=c.quality
+	end
+
+	if stat[c.address.."count"]
+		then stat[c.address.."count"]=stat[c.address.."count"]+1
+		else stat[c.address.."count"]=0
+	end
+
+	if stat[c.address.."sum"]
+		then stat[c.address.."sum"]=stat[c.address.."sum"]+c.quality
+		else stat[c.address.."sum"]=0
+	end
 end
 
 function proces()
@@ -61,27 +79,7 @@ function proces()
 		if c.quality==nil then else
 			hist[#hist+1] = c
 			print(col(i,3)..col(c.cellnum,3)..col(c.channel,3)..col(c.essid,18)..col(c.address,18)..col(c.quality,3)..bar(tonumber(c.quality)))
-			
-			if stat[c.address.."max"]
-				then if stat[c.address.."max"]<c.quality then stat[c.address.."max"] = c.quality end
-				else stat[c.address.."max"]=c.quality
-			end
-			
-			if stat[c.address.."min"]
-				then if stat[c.address.."min"]>c.quality then stat[c.address.."max"] = c.quality end
-				else stat[c.address.."min"]=c.quality
-			end
-
-			if stat[c.address.."count"]
-				then stat[c.address.."count"]=stat[c.address.."count"]+1
-				else stat[c.address.."count"]=0
-			end
-
-			if stat[c.address.."sum"]
-				then stat[c.address.."sum"]=stat[c.address.."sum"]+c.quality
-				else stat[c.address.."sum"]=0
-			end
-
+			gatherStat(c)
 		end
 	end
 	print(#hist)

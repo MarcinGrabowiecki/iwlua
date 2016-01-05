@@ -15,7 +15,12 @@ function injectString(s,c)
 	local ret = s
 	local min=tonumber(stat[c.address.."min"])
 	local max=tonumber(stat[c.address.."max"])
+	local sum=tonumber(stat[c.address.."sum"])
+	local count=tonumber(stat[c.address.."count"])
+	local avg=math.floor(sum/count)
+	if count == 0 then avg=0 end
 	ret=ret:sub(0,min).."m"..ret:sub(min)
+	ret=ret:sub(0,avg).."a"..ret:sub(avg)
 	ret=ret:sub(0,max).."X"..ret:sub(max)
 	return ret
 end

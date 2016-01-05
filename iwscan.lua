@@ -82,10 +82,11 @@ function proces()
 			gatherStat(c)
 		end
 	end
+
 	print(#hist)
 	
 	for i,j in pairs(stat) do
-		print(i,j)
+--		print(i,j)
 	end
 
 end

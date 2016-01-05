@@ -20,9 +20,9 @@ function injectString(s,c)
 	local count=tonumber(stat[c.address.."count"])
 	local avg=math.floor(sum/count)
 	if count == 0 then avg=0 end
-	ret=ret:sub(0,avg).."a"..ret:sub(avg+2)
-	ret=ret:sub(0,min).."m"..ret:sub(min+2)
-	ret=ret:sub(0,max).."X"..ret:sub(max+2)
+	ret=ret:sub(0,avg).."+"..ret:sub(avg+2)
+	ret=ret:sub(0,min).."<"..ret:sub(min+2)
+	ret=ret:sub(0,max)..">"..ret:sub(max+2)
 	return ret
 end
 

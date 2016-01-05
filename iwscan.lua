@@ -2,11 +2,25 @@
 
 local ansiPrefix = string.char(27).."["
 local goto00 = ansiPrefix.."0;0H"
+local hist={}
+local stat={}
+
 
 function add(k,v,tt)
 	if v==nil then return end
 	tt[k]=v
 end	
+
+function bar(q)
+	local ret=""
+	for i=0,q,1 do
+		ret=ret.."|"
+	end
+	for i=0,70-q,1 do
+		ret=ret.."-"
+	end
+	return ret
+end
 
 function proces()
 
@@ -31,20 +45,11 @@ function proces()
 	r[#r+1] = tt
 	table.remove(r,1)
 
-	function bar(q)
-		local ret=""
-		for i=0,q,1 do
-			ret=ret.."|"
-		end
-		for i=0,70-q,1 do
-			ret=ret.."-"
-		end
-		return ret
-	end
 
 	function col(s,n)
 		return string.sub(s.."                              ",0,n)
 	end
+
 
 	table.sort(r,function(a,b) return a.quality>b.quality end)
 
@@ -54,10 +59,36 @@ function proces()
 		if c.quality==nil then else
 			hist[#hist+1] = c
 			print(col(i,3)..col(c.cellnum,3)..col(c.channel,3)..col(c.essid,18)..col(c.address,18)..col(c.quality,3)..bar(tonumber(c.quality)))
+			
+			if stat[c.address.."max"]
+				then if stat[c.address.."max"]<c.quality then stat[c.address.."max"] = c.quality end
+				else stat[c.address.."max"]=c.quality
+			end
+			
+			if stat[c.address.."min"]
+				then if stat[c.address.."min"]>c.quality then stat[c.address.."max"] = c.quality end
+				else stat[c.address.."min"]=c.quality
+			end
+
+			if stat[c.address.."count"]
+				then stat[c.address.."count"]=stat[c.address.."count"]+1
+				else stat[c.address.."count"]=0
+			end
+
+			if stat[c.address.."sum"]
+				then stat[c.address.."sum"]=stat[c.address.."sum"]+c.quality
+				else stat[c.address.."sum"]=0
+			end
+
+
 		end
 	end
 	print(#hist)
 	
+	for i,j in pairs(stat) do
+		print(i,j)
+	end
+
 end
 
 for i=0,100,1 do

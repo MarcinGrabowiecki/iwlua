@@ -26,6 +26,10 @@ function col(s,n)
 	return string.sub(s.."                              ",0,n)
 end
 
+function stat(c)
+
+end
+
 function proces()
 
 	local proc = assert (io.popen ("/sbin/iwlist scan"))
@@ -48,9 +52,6 @@ function proces()
 		end
 	r[#r+1] = tt
 	table.remove(r,1)
-
-
-
 
 	table.sort(r,function(a,b) return a.quality>b.quality end)
 
@@ -80,7 +81,6 @@ function proces()
 				then stat[c.address.."sum"]=stat[c.address.."sum"]+c.quality
 				else stat[c.address.."sum"]=0
 			end
-
 
 		end
 	end

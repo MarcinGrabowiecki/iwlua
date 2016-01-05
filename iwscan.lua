@@ -11,8 +11,12 @@ function add(k,v,tt)
 	tt[k]=v
 end	
 
-function injectString(s,r,pos)
-	ret=s:sub(0,pos)..r..s:sub(pos)
+function injectString(s,c)
+	local ret = s
+	local min=tonumber(stat[c.address.."min"])
+	local max=tonumber(stat[c.address.."max"])
+	ret=ret:sub(0,min).."m"..ret:sub(min)
+	ret=ret:sub(0,max).."X"..ret:sub(max)
 	return ret
 end
 
@@ -23,7 +27,7 @@ function bar(c)
 	local ret=""
 	ret=ret..e:rep(v)
 	ret=ret..n:rep(70-v)
-	return injectString(ret,"X",stat[c.address.."max"])
+	return injectString(ret,c)
 end
 
 function col(s,n)
@@ -37,7 +41,7 @@ function gatherStat(c)
 	end
 
 	if stat[c.address.."min"]
-		then if stat[c.address.."min"]>c.quality then stat[c.address.."max"] = c.quality end
+		then if stat[c.address.."min"]>c.quality then stat[c.address.."min"] = c.quality end
 		else stat[c.address.."min"]=c.quality
 	end
 

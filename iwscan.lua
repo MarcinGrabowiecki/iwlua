@@ -18,15 +18,18 @@ function statNum(c,t)
 end
 
 function stats(c)
-	return {"a":"b"}
+	t={}
+	t["min"]=statNum(c,"min")
+	t["max"]=statNum(c,"max")
+	t["avg"]=math.floor(statNum(c,"sum")/(statNum(c,"count")+0.01))
+	return t
 end
 
 function injectString(s,c)
 	local ret = s
-	local avg=math.floor(statNum(c,"sum")/(statNum(c,"count")+0.01))
-	ret=ret:sub(0,avg).."+"..ret:sub(avg+2)
-	ret=ret:sub(0,statNum(c,"min")).."<"..ret:sub(statNum(c,"min")+2)
-	ret=ret:sub(0,statNum(c,"max"))..">"..ret:sub(statNum(c,"max")+2)
+	ret=ret:sub(0,stats(c).avg).."+"..ret:sub(stats(c).avg+2)
+	ret=ret:sub(0,stats(c).min).."<"..ret:sub(stats(c).min+2)
+	ret=ret:sub(0,stats(c).max)..">"..ret:sub(stats(c).max+2)
 	return ret
 end
 

@@ -17,7 +17,8 @@ function add(k,v,tt)
 end	
 
 function statNum(c,t)
-	return tonumber(stat[c.address..t])
+	local r=tonumber(stat[c.address..t])
+	if r==nil then return 0 else return r end
 end
 
 function stats(c)
@@ -81,21 +82,21 @@ function proces()
 
 	for l in proc:lines () do
 		--print (l)
-		cellnum,address = string.match(l,"%s%s%s%s%s%s%sCell (%d+)............(.*)")
+		cellnum,address = string.match(l,"%s%s%s%s%s%s%s%sCell (%d+)............(.*)")
 		if cellnum then
 			r[#r+1] = tt
 			tt={}
 			add("cellnum",cellnum,tt)
 			add("address",address,tt)
 		end
-		add("essid",string.match(l,"ESSID:.(.*)."),tt)
-		add("channel",string.match(l,"Channel:(%d+)"),tt)
-		add("quality",string.match(l,"Quality=(%d+).*"),tt)
+		add("essid",string.match(l,"%s%s%sESSID:.(.*)."),tt)
+		add("channel",string.match(l,"%s%s%s%Channel:(%d+)"),tt)
+		add("quality",string.match(l,"%s%s%sQuality=(%d+).*"),tt)
 		end
 	r[#r+1] = tt
 	table.remove(r,1)
-	--table.sort(r,function(a,b) return stats(a).max>stats(b).max end)
-	table.sort(r,function(a,b) return a.quality>b.quality end)
+	table.sort(r,function(a,b) return stats(a).avg>stats(b).avg end)
+	--table.sort(r,function(a,b) return a.quality>b.quality end)
 	--table.sort(r,function(a,b) return a.essid>b.essid end)
 	print(goto00)
 
@@ -105,16 +106,12 @@ function proces()
 			print(col(i,3)..col(c.cellnum,3)..col(c.channel,3)..col(c.essid,18)..col(c.address,18)..col(c.quality,3)..bar(c))
 		end
 	end
-	for i,j in pairs(stat.scanned) do
-		print(clearLine..i,colorRed..j.essid..colorReset)
-	end
+	-- for i,j in pairs(stat.scanned) do
+	-- 	print(clearLine..i,colorRed..j.essid..colorReset)
+	-- end
 end
 
 for i=0,1000,1 do
 	proces()
-	-- for j=0,9,1 do
-	-- 	print(ansiPrefix.."4"..j.."m"..j..j..j..j..j..j..j..j..j..j..j..j..j..j..j)
-	-- 	print(ansiPrefix.."3"..j.."m"..j..j..j..j..j..j..j..j..j..j..j..j..j..j..j)
-	-- end
 end
 

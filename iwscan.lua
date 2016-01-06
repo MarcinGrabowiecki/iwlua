@@ -4,25 +4,25 @@ os.execute("reset")
 
 local ansiPrefix = string.char(27).."["
 local goto00 = ansiPrefix.."0;0H"
+local colorRed = ansiPrefix.."31m"
+local colorWhite = ansiPrefix.."37m"
 local stat={}
-
 
 function add(k,v,tt)
 	if v==nil then return end
 	tt[k]=v
 end	
 
+function statNum(c,t)
+	return tonumber(stat[c.address..t])
+end
+
 function injectString(s,c)
 	local ret = s
-	local min=tonumber(stat[c.address.."min"])
-	local max=tonumber(stat[c.address.."max"])
-	local sum=tonumber(stat[c.address.."sum"])
-	local count=tonumber(stat[c.address.."count"])
-	local avg=math.floor(sum/count)
-	if count == 0 then avg=0 end
+	local avg=math.floor(statNum(c,"sum")/(statNum(c,"count")+0.01))
 	ret=ret:sub(0,avg).."+"..ret:sub(avg+2)
-	ret=ret:sub(0,min).."<"..ret:sub(min+2)
-	ret=ret:sub(0,max)..">"..ret:sub(max+2)
+	ret=ret:sub(0,statNum(c,"min")).."<"..ret:sub(statNum(c,"min")+2)
+	ret=ret:sub(0,statNum(c,"max"))..">"..ret:sub(statNum(c,"max")+2)
 	return ret
 end
 
@@ -45,20 +45,21 @@ function gatherStat(c)
 		then if stat[c.address.."max"]<c.quality then stat[c.address.."max"] = c.quality end
 		else stat[c.address.."max"]=c.quality
 	end
-
 	if stat[c.address.."min"]
 		then if stat[c.address.."min"]>c.quality then stat[c.address.."min"] = c.quality end
 		else stat[c.address.."min"]=c.quality
 	end
-
 	if stat[c.address.."count"]
 		then stat[c.address.."count"]=stat[c.address.."count"]+1
 		else stat[c.address.."count"]=0
 	end
-
 	if stat[c.address.."sum"]
 		then stat[c.address.."sum"]=stat[c.address.."sum"]+c.quality
 		else stat[c.address.."sum"]=0
+	end
+	if stat["scanned"]
+		then stat["scanned"][c.address]=c
+		else stat["scanned"]={}
 	end
 end
 
@@ -70,7 +71,7 @@ function proces()
 
 	for l in proc:lines () do
 		--print (l)
-		cellnum,address = string.match(l,"Cell (%d+)............(.*)")
+		cellnum,address = string.match(l,"[%s]+Cell (%d+)............(.*)")
 		if cellnum then
 			r[#r+1] = tt
 			tt={}
@@ -80,14 +81,11 @@ function proces()
 		add("essid",string.match(l,"ESSID:.(.*)."),tt)
 		add("channel",string.match(l,"Channel:(%d+)"),tt)
 		add("quality",string.match(l,"Quality=(%d+).*"),tt)
-		--cellNum,n,cellAddr=string.match(l,"(%d+)(............)(.................)")
 		end
 	r[#r+1] = tt
 	table.remove(r,1)
-
-	-- table.sort(r,function(a,b) return a.quality>b.quality end)
-	table.sort(r,function(a,b) return a.essid>b.essid end)
-
+	table.sort(r,function(a,b) return a.quality>b.quality end)
+	--table.sort(r,function(a,b) return a.essid>b.essid end)
 	print(goto00)
 
 	for i,c in pairs(r) do
@@ -96,13 +94,16 @@ function proces()
 			print(col(i,3)..col(c.cellnum,3)..col(c.channel,3)..col(c.essid,18)..col(c.address,18)..col(c.quality,3)..bar(c))
 		end
 	end
+	for i,j in pairs(stat.scanned) do
+		print(i,colorRed..j.essid..colorWhite)
+	end
 end
 
 for i=0,1000,1 do
 	proces()
 end
 
---pc("31mxpa")
+--
 --pc("32mxpa")
 --pc("33mxpa")
 --pc("34mxpa")

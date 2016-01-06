@@ -17,6 +17,10 @@ function statNum(c,t)
 	return tonumber(stat[c.address..t])
 end
 
+function stats(c)
+	return {"a":"b"}
+end
+
 function injectString(s,c)
 	local ret = s
 	local avg=math.floor(statNum(c,"sum")/(statNum(c,"count")+0.01))
@@ -85,6 +89,7 @@ function proces()
 	r[#r+1] = tt
 	table.remove(r,1)
 	table.sort(r,function(a,b) return a.quality>b.quality end)
+	--table.sort(r,function(a,b) return a.quality>b.quality end)
 	--table.sort(r,function(a,b) return a.essid>b.essid end)
 	print(goto00)
 

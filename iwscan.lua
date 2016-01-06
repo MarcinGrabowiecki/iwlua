@@ -1,4 +1,4 @@
-#!/usr/bin/lua
+#!/usr/bin/env lua
 
 os.execute("reset")
 
@@ -10,6 +10,7 @@ local colorReset = ansiPrefix.."0m"
 local colorWhite = ansiPrefix.."37m"
 local clearLine = ansiPrefix.."2K"
 local stat={}
+local space="%s"
 
 function add(k,v,tt)
 	if v==nil then return end

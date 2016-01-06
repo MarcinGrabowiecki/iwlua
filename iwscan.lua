@@ -3,9 +3,12 @@
 os.execute("reset")
 
 local ansiPrefix = string.char(27).."["
-local goto00 = ansiPrefix.."0;0H"
+--local goto00 = ansiPrefix.."0;0H"
+local goto00 = ansiPrefix.."H"
 local colorRed = ansiPrefix.."31m"
+local colorReset = ansiPrefix.."0m"
 local colorWhite = ansiPrefix.."37m"
+local clearLine = ansiPrefix.."2K"
 local stat={}
 
 function add(k,v,tt)
@@ -78,7 +81,7 @@ function proces()
 
 	for l in proc:lines () do
 		--print (l)
-		cellnum,address = string.match(l,"[%s]+Cell (%d+)............(.*)")
+		cellnum,address = string.match(l,"%s%s%s%s%s%s%sCell (%d+)............(.*)")
 		if cellnum then
 			r[#r+1] = tt
 			tt={}
@@ -103,19 +106,15 @@ function proces()
 		end
 	end
 	for i,j in pairs(stat.scanned) do
-		print(i,colorRed..j.essid..colorWhite)
+		print(clearLine..i,colorRed..j.essid..colorReset)
 	end
 end
 
 for i=0,1000,1 do
 	proces()
+	-- for j=0,9,1 do
+	-- 	print(ansiPrefix.."4"..j.."m"..j..j..j..j..j..j..j..j..j..j..j..j..j..j..j)
+	-- 	print(ansiPrefix.."3"..j.."m"..j..j..j..j..j..j..j..j..j..j..j..j..j..j..j)
+	-- end
 end
 
---
---pc("32mxpa")
---pc("33mxpa")
---pc("34mxpa")
---pc("6n")
---
---pc("10A")
---pc("33mxpa")

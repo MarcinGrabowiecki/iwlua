@@ -11,6 +11,7 @@ local colorWhite = ansiPrefix.."37m"
 local clearLine = ansiPrefix.."2K"
 local stat={}
 local space="%s"
+stat["scanned"]={}
 
 function add(k,v,tt)
 	if v==nil then return end
@@ -53,26 +54,17 @@ function col(s,n)
 end
 
 function gatherStat(c)
-	if stat[c.address.."max"]
-		then if stat[c.address.."max"]<c.quality then stat[c.address.."max"] = c.quality end
-		else stat[c.address.."max"]=c.quality
+	if stat[c.address.."max"] then else
+		stat[c.address.."max"]=c.quality
+		stat[c.address.."min"]=c.quality
+		stat[c.address.."count"]=0
+		stat[c.address.."sum"]=0
 	end
-	if stat[c.address.."min"]
-		then if stat[c.address.."min"]>c.quality then stat[c.address.."min"] = c.quality end
-		else stat[c.address.."min"]=c.quality
-	end
-	if stat[c.address.."count"]
-		then stat[c.address.."count"]=stat[c.address.."count"]+1
-		else stat[c.address.."count"]=0
-	end
-	if stat[c.address.."sum"]
-		then stat[c.address.."sum"]=stat[c.address.."sum"]+c.quality
-		else stat[c.address.."sum"]=0
-	end
-	if stat["scanned"]
-		then stat["scanned"][c.address]=c
-		else stat["scanned"]={}
-	end
+		if stat[c.address.."max"]<c.quality then stat[c.address.."max"] = c.quality end
+		if stat[c.address.."min"]>c.quality then stat[c.address.."min"] = c.quality end
+		stat[c.address.."count"]=stat[c.address.."count"]+1
+		stat[c.address.."sum"]=stat[c.address.."sum"]+c.quality
+		stat["scanned"][c.address]=c
 end
 
 function proces()

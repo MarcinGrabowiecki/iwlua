@@ -91,8 +91,8 @@ function proces()
 		end
 	r[#r+1] = tt
 	table.remove(r,1)
-	table.sort(r,function(a,b) return stats(a).max>stats(b).max end)
-	--table.sort(r,function(a,b) return a.quality>b.quality end)
+	--table.sort(r,function(a,b) return stats(a).max>stats(b).max end)
+	table.sort(r,function(a,b) return a.quality>b.quality end)
 	--table.sort(r,function(a,b) return a.essid>b.essid end)
 	print(goto00)
 

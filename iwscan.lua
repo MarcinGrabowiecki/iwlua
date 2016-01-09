@@ -24,7 +24,7 @@ function statNum(c,t)
 end
 
 function stats(c)
-	t={}
+	local t={}
 	t["min"]=statNum(c,"min")
 	t["max"]=statNum(c,"max")
 	t["avg"]=math.floor(statNum(c,"sum")/(statNum(c,"count")+0.01))
@@ -40,7 +40,7 @@ function injectString(s,c)
 end
 
 function bar(c)
-	local e="|"
+	local e=":"
 	local n = "-"
 	local v = tonumber(c.quality)
 	local ret=""
@@ -57,7 +57,7 @@ function gatherStat(c)
 	if stat[c.address.."max"] then else
 		stat[c.address.."max"]=c.quality
 		stat[c.address.."min"]=c.quality
-		stat[c.address.."count"]=0
+		stat[c.address.."count"]=0,0001
 		stat[c.address.."sum"]=0
 	end
 		if stat[c.address.."max"]<c.quality then stat[c.address.."max"] = c.quality end
@@ -67,22 +67,32 @@ function gatherStat(c)
 		stat["scanned"][c.address]=c
 end
 
-function proces()
+function remove(t,key)
+	local toremove = 0
+	for i,j in pairs(t) do
+		toremove=toremove+1
+		if j==key then
+			table.remove(t,toremove)
+			return
+		end
+	end
+	
+end
 
+function proces()
 	local proc = assert (io.popen ("/sbin/iwlist scan 2>/dev/null"))
 	local r={}
 	local tt={}
-
 	for l in proc:lines () do
 		--print (l)
-		cellnum,address = string.match(l,"%s%s%s%s%s%s%s%sCell (%d+)............(.*)")
+		cellnum,address = string.match(l,space:rep(10).."Cell (%d+)............(.*)")
 		if cellnum then
 			r[#r+1] = tt
 			tt={}
 			add("cellnum",cellnum,tt)
 			add("address",address,tt)
 		end
-		add("essid",string.match(l,"%s%s%sESSID:.(.*)."),tt)
+		add("essid",string.match(l,space:rep(20).."ESSID:.(.*)."),tt)
 		add("channel",string.match(l,"%s%s%s%Channel:(%d+)"),tt)
 		add("quality",string.match(l,"%s%s%sQuality=(%d+).*"),tt)
 		end
@@ -91,14 +101,27 @@ function proces()
 	table.sort(r,function(a,b) return stats(a).avg>stats(b).avg end)
 	--table.sort(r,function(a,b) return a.quality>b.quality end)
 	--table.sort(r,function(a,b) return a.essid>b.essid end)
-	print(goto00)
+	
+	local removed={}
+	for i,j in pairs(stat["scanned"]) do
+		removed[#removed+1] = i
+	end
 
+	print(goto00)
 	for i,c in pairs(r) do
 		if c.quality==nil then else
 			gatherStat(c)
 			print(col(i,3)..col(c.cellnum,3)..col(c.channel,3)..col(c.essid,18)..col(c.address,18)..col(c.quality,3)..bar(c))
+			remove(removed,c.address)
 		end
 	end
+
+	print("-------------- removed ----------------")
+	for i,j in pairs(removed) do
+		print(i,j,stat["scanned"][j].essid)
+	end
+
+
 	-- for i,j in pairs(stat.scanned) do
 	-- 	print(clearLine..i,colorRed..j.essid..colorReset)
 	-- end

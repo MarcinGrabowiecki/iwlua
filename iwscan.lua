@@ -1,14 +1,9 @@
 #!/usr/bin/env lua
-
 os.execute("reset")
-
 local ansiPrefix = string.char(27).."["
 --local goto00 = ansiPrefix.."0;0H"
 local goto00 = ansiPrefix.."H"
-local colorRed = ansiPrefix.."31m"
-local colorGreen = ansiPrefix.."32m"
-local colorReset = ansiPrefix.."0m"
-local colorWhite = ansiPrefix.."37m"
+local color={["reset"] = ansiPrefix.."0m",["red"] = ansiPrefix.."31m",["green"] = ansiPrefix.."32m"}
 local clearLine = ansiPrefix.."2K"
 local stat={}
 local space="%s"
@@ -51,7 +46,8 @@ function bar(c)
 end
 
 function col(s,n)
-	return string.sub(s.."                    ",0,n)
+	local sp=" "
+	return string.sub(s..sp:rep(20),0,n)
 end
 
 function gatherStat(c)
@@ -84,7 +80,7 @@ function remove(t,key)
 end
 
 function proces()
-	local proc = assert (io.popen ("/sbin/iwlist scan 2>/dev/null"))
+	local proc = assert (io.popen ("`which iwlist` scan 2>/dev/null"))
 	local r={}
 	local tt={}
 	for l in proc:lines () do
@@ -116,7 +112,7 @@ function proces()
 		if c.quality==nil then else
 			local new=gatherStat(c)
 			local row=(col(i,3)..col(c.cellnum,3)..col(c.channel,3)..col(c.essid,18)..col(c.address,18)..col(c.quality,3)..bar(c))
-			if new then row=colorGreen..row..colorReset end
+			if new then row=color.green..row..color.reset end
 			print(row)
 			stat[c.address.."row"]=row
 			remove(removed,c.address)
@@ -124,7 +120,7 @@ function proces()
 	end
 
 	for i,j in pairs(removed) do
-		print(colorRed..stat[j.."row"]..colorReset)
+		print(color.red..stat[j.."row"]..color.reset)
 	end
 
 	-- for i,j in pairs(stat.scanned) do

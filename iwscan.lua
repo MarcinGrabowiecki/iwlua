@@ -6,6 +6,7 @@ local ansiPrefix = string.char(27).."["
 --local goto00 = ansiPrefix.."0;0H"
 local goto00 = ansiPrefix.."H"
 local colorRed = ansiPrefix.."31m"
+local colorGreen = ansiPrefix.."32m"
 local colorReset = ansiPrefix.."0m"
 local colorWhite = ansiPrefix.."37m"
 local clearLine = ansiPrefix.."2K"
@@ -54,17 +55,20 @@ function col(s,n)
 end
 
 function gatherStat(c)
+	local new = false
 	if stat[c.address.."max"] then else
 		stat[c.address.."max"]=c.quality
 		stat[c.address.."min"]=c.quality
 		stat[c.address.."count"]=0,0001
 		stat[c.address.."sum"]=0
+		new = true
 	end
-		if stat[c.address.."max"]<c.quality then stat[c.address.."max"] = c.quality end
-		if stat[c.address.."min"]>c.quality then stat[c.address.."min"] = c.quality end
-		stat[c.address.."count"]=stat[c.address.."count"]+1
-		stat[c.address.."sum"]=stat[c.address.."sum"]+c.quality
-		stat["scanned"][c.address]=c
+	if stat[c.address.."max"]<c.quality then stat[c.address.."max"] = c.quality end
+	if stat[c.address.."min"]>c.quality then stat[c.address.."min"] = c.quality end
+	stat[c.address.."count"]=stat[c.address.."count"]+1
+	stat[c.address.."sum"]=stat[c.address.."sum"]+c.quality
+	stat["scanned"][c.address]=c
+	return new
 end
 
 function remove(t,key)
@@ -93,8 +97,8 @@ function proces()
 			add("address",address,tt)
 		end
 		add("essid",string.match(l,space:rep(20).."ESSID:.(.*)."),tt)
-		add("channel",string.match(l,"%s%s%s%Channel:(%d+)"),tt)
-		add("quality",string.match(l,"%s%s%sQuality=(%d+).*"),tt)
+		add("channel",string.match(l,space:rep(20).."Channel:(%d+)"),tt)
+		add("quality",string.match(l,space:rep(20).."Quality=(%d+).*"),tt)
 		end
 	r[#r+1] = tt
 	table.remove(r,1)
@@ -110,17 +114,18 @@ function proces()
 	print(goto00)
 	for i,c in pairs(r) do
 		if c.quality==nil then else
-			gatherStat(c)
-			print(col(i,3)..col(c.cellnum,3)..col(c.channel,3)..col(c.essid,18)..col(c.address,18)..col(c.quality,3)..bar(c))
+			local new=gatherStat(c)
+			local row=(col(i,3)..col(c.cellnum,3)..col(c.channel,3)..col(c.essid,18)..col(c.address,18)..col(c.quality,3)..bar(c))
+			if new then row=colorGreen..row..colorReset end
+			print(row)
+			stat[c.address.."row"]=row
 			remove(removed,c.address)
 		end
 	end
 
-	print("-------------- removed ----------------")
 	for i,j in pairs(removed) do
-		print(i,j,stat["scanned"][j].essid)
+		print(colorRed..stat[j.."row"]..colorReset)
 	end
-
 
 	-- for i,j in pairs(stat.scanned) do
 	-- 	print(clearLine..i,colorRed..j.essid..colorReset)

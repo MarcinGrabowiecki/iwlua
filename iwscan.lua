@@ -3,20 +3,12 @@ os.execute("reset")
 local ansiPrefix = string.char(27).."["
 --local goto00 = ansiPrefix.."0;0H"
 local goto00 = ansiPrefix.."H"
-local color={["reset"] = ansiPrefix.."0m",["red"] = ansiPrefix.."31m",["green"] = ansiPrefix.."32m",["yellow"]=ansiPrefix.."33m",["blue"]=ansiPrefix.."34m"}
+local color={["reset"] = ansiPrefix.."0m",["red"] = ansiPrefix.."31m",["green"] = ansiPrefix.."32m",["yellow"]=ansiPrefix.."33m",["xblue"]=ansiPrefix.."35m",["blue"]=ansiPrefix.."34m",["yblue"]=ansiPrefix.."36m"}
 local bg={["reset"] = ansiPrefix.."0m",["red"] = ansiPrefix.."41m",["green"] = ansiPrefix.."42m",["yellow"]=ansiPrefix.."43m",["blue"]=ansiPrefix.."44m"}
 local clearLine = ansiPrefix.."2K"
-local stat={}
 local space="%s"
-stat["scanned"]={}
-
-function stats(c)
-	function statNum(c,t)
-		local r=tonumber(stat[c.address..t])
-		if r==nil then return c.quality else return r end
-	end
-	return {["min"]=statNum(c,"min"),["max"]=statNum(c,"max"),["avg"]=math.floor(statNum(c,"sum")/(statNum(c,"count")))}
-end
+local allCells={}
+local scanNum=0
 
 function add(k,v,tt)
 	if v==nil then return end
@@ -24,17 +16,17 @@ function add(k,v,tt)
 end	
 
 function bar(c)
-	local e=":"
-	local n = "-"
+	--print(c.essid,c.address,c.avgQuality,c.minQuality)
+	local e="|"
+	local n = "."
 	local v = tonumber(c.quality)
 	local ret=e:rep(v)..n:rep(70-v)..bg.reset
 	--ret=string.rep("1234567890",10);ret=ret:sub(v)
-	local st=stats(c)
-	local zm=ret:sub(0,st.min)
-	local ma=ret:sub(st.min+2,st.avg+1)
-	local ax=ret:sub(st.avg+3,st.max+2)
-	local xe=ret:sub(st.max+4)
-	return color.reset..zm..color.yellow.."<"..ma.."+"..ax..">"..color.reset..xe
+	local zm=ret:sub(0,c.minQuality)
+	local ma=ret:sub(c.minQuality+2,c.avgQuality+1)
+	local ax=ret:sub(c.avgQuality+3,c.maxQuality+2)
+	local xe=ret:sub(c.maxQuality+4)
+	return color.reset..zm..color.yblue.."<"..ma.."+"..ax..">"..color.reset..xe
 end
 
 function col(s,n)
@@ -42,86 +34,75 @@ function col(s,n)
 	return string.sub(s..sp:rep(20),0,n)
 end
 
-function gatherStat(c)
-	local new = false
-	if stat[c.address.."max"] then else
-		stat[c.address.."max"]=c.quality
-		stat[c.address.."min"]=c.quality
-		stat[c.address.."count"]=0,0001
-		stat[c.address.."sum"]=0
-		new = true
-	end
-	if stat[c.address.."max"]<c.quality then stat[c.address.."max"] = c.quality end
-	if stat[c.address.."min"]>c.quality then stat[c.address.."min"] = c.quality end
-	stat[c.address.."count"]=stat[c.address.."count"]+1
-	stat[c.address.."sum"]=stat[c.address.."sum"]+c.quality
-	stat["scanned"][c.address]=c
-	return new
+function ifNilVal(e,v)
+	if e then return e end
+	return v
 end
 
-function remove(t,key)
-	local toremove = 0
-	for i,j in pairs(t) do
-		toremove=toremove+1
-		if j==key then
-			table.remove(t,toremove)
-			return
+function addWithStats(c,sn)
+	if c.address==nil then else
+		local qu=tonumber(c.quality)
+		if allCells[c.address] == nil
+		then
+			c.firstScan=sn
+			c.scanCount=1
+			c.sumQuality=qu
+			c.avgQuality=qu
+			c.minQuality=qu
+			c.maxQuality=qu
+		else
+			if c.quality==nil then exit(0) end
+			c.scanCount=1+allCells[c.address].scanCount
+			c.sumQuality=c.quality+allCells[c.address].sumQuality
+			c.avgQuality=math.floor(c.sumQuality/c.scanCount)
+			if allCells[c.address].maxQuality < qu then c.maxQuality=qu else c.maxQuality=allCells[c.address].maxQuality end
+			if allCells[c.address].minQuality > qu then c.minQuality=qu else c.minQuality=allCells[c.address].minQuality end
 		end
+		allCells[c.address]=c
 	end
-	
 end
+
 
 function proces()
+	scanNum=scanNum+1
 	local proc = assert (io.popen ("`which iwlist` scan 2>/dev/null"))
-	local r={}
 	local tt={}
 	for l in proc:lines () do
-		--print (l)
 		cellnum,address = string.match(l,space:rep(10).."Cell (%d+)............(.*)")
 		if cellnum then
-			r[#r+1] = tt
+			addWithStats(tt,scanNum)
 			tt={}
 			add("cellnum",cellnum,tt)
 			add("address",address,tt)
+			add("scanNum",scanNum,tt)
 		end
 		add("essid",string.match(l,space:rep(20).."ESSID:.(.*)."),tt)
 		add("channel",string.match(l,space:rep(20).."Channel:(%d+)"),tt)
 		add("quality",string.match(l,space:rep(20).."Quality=(%d+).*"),tt)
 		end
-	r[#r+1] = tt
-	table.remove(r,1)
-	table.sort(r,function(a,b) return stats(a).avg>stats(b).avg end)
+		addWithStats(tt,scanNum)
+	--table.sort(r,function(a,b) return stats(a).avg>stats(b).avg end)
 	--table.sort(r,function(a,b) return a.quality>b.quality end)
-	--table.sort(r,function(a,b) return a.essid>b.essid end)
-	
-	local removed={}
-	for i,j in pairs(stat["scanned"]) do
-		removed[#removed+1] = i
-	end
+	--table.sort(r,function(a,b) return a.essid>b.essid end)	
+	--table.sort(allCells,function(a,b) return allCells[f].avgQuality>allCells[b].avgQuality end)
 
 	print(goto00)
-	for i,c in pairs(r) do
-		if c.quality==nil then else
-			local new=gatherStat(c)
-			local row=(col(i,3)..col(c.cellnum,3)..col(c.channel,3)..col(c.essid,18)..col(c.address,18)..col(c.quality,3)..bar(c))
-			if new then row=color.green..row..color.reset end
-			print(row)
-			stat[c.address.."row"]=row
-			remove(removed,c.address)
-		end
-	end
 
-	for i,j in pairs(removed) do
-		print(color.red..stat[j.."row"]..color.reset)
-	end
+	toSort={}
+	for a,c in pairs(allCells) do
+		table.insert(toSort,c)
+	end	
+	table.sort(toSort,function(a,b) return a.quality>b.quality end)
 
-	-- for i,j in pairs(stat.scanned) do
-	-- 	print(clearLine..i,colorRed..j.essid..colorReset)
-	-- end
+	for i,c in pairs(toSort) do
+		local row=(col(i,3)..col(c.cellnum,3)..col(c.channel,3)..col(c.essid,18)..col(c.address,18)..col(c.quality,3)..bar(c))
+		if new then row=color.green..row..color.reset end
+		if c.scanNum==scanNum then else row=color.red..row..color.reset end
+		print(row)
+	end
 end
 
 for i=0,1000,1 do
 	proces()
-	os.execute("sleep 1")
+	--os.execute("sleep 1")
 end
-

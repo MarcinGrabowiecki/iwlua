@@ -4,39 +4,37 @@ local ansiPrefix = string.char(27).."["
 --local goto00 = ansiPrefix.."0;0H"
 local goto00 = ansiPrefix.."H"
 local color={["reset"] = ansiPrefix.."0m",["red"] = ansiPrefix.."31m",["green"] = ansiPrefix.."32m",["yellow"]=ansiPrefix.."33m",["blue"]=ansiPrefix.."34m"}
+local bg={["reset"] = ansiPrefix.."0m",["red"] = ansiPrefix.."41m",["green"] = ansiPrefix.."42m",["yellow"]=ansiPrefix.."43m",["blue"]=ansiPrefix.."44m"}
 local clearLine = ansiPrefix.."2K"
 local stat={}
 local space="%s"
 stat["scanned"]={}
+
+function stats(c)
+	function statNum(c,t)
+		local r=tonumber(stat[c.address..t])
+		if r==nil then return c.quality else return r end
+	end
+	return {["min"]=statNum(c,"min"),["max"]=statNum(c,"max"),["avg"]=math.floor(statNum(c,"sum")/(statNum(c,"count")))}
+end
 
 function add(k,v,tt)
 	if v==nil then return end
 	tt[k]=v
 end	
 
-function statNum(c,t)
-	local r=tonumber(stat[c.address..t])
-	if r==nil then return 0 else return r end
-end
-
-function stats(c)
-	return {["min"]=statNum(c,"min"),["max"]=statNum(c,"max"),["avg"]=math.floor(statNum(c,"sum")/(statNum(c,"count")))}
-end
-
 function bar(c)
 	local e=":"
 	local n = "-"
 	local v = tonumber(c.quality)
-	local ret=""
-	ret=ret..e:rep(v)
-	ret=ret..n:rep(70-v)
+	local ret=e:rep(v)..n:rep(70-v)..bg.reset
 	--ret=string.rep("1234567890",10);ret=ret:sub(v)
 	local st=stats(c)
 	local zm=ret:sub(0,st.min)
 	local ma=ret:sub(st.min+2,st.avg+1)
 	local ax=ret:sub(st.avg+3,st.max+2)
 	local xe=ret:sub(st.max+4)
-	return color.reset..zm..color.blue.."<"..ma.."+"..ax..">"..color.reset..xe
+	return color.reset..zm..color.yellow.."<"..ma.."+"..ax..">"..color.reset..xe
 end
 
 function col(s,n)

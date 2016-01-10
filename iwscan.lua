@@ -27,14 +27,6 @@ function stats(c)
 	return t
 end
 
-function injectString(s,c)
-	local ret = s
-	ret=ret:sub(0,stats(c).min).."<"..ret:sub(stats(c).min+2)
-	ret=ret:sub(0,stats(c).max)..">"..ret:sub(stats(c).max+2)
-	ret=ret:sub(0,stats(c).avg).."+"..ret:sub(stats(c).avg+2)
-	return ret
-end
-
 function bar(c)
 	local e=":"
 	local n = "-"
@@ -42,7 +34,10 @@ function bar(c)
 	local ret=""
 	ret=ret..e:rep(v)
 	ret=ret..n:rep(70-v)
-	return injectString(ret,c)
+	ret=ret:sub(0,stats(c).min).."<"..ret:sub(stats(c).min+2)
+	ret=ret:sub(0,stats(c).max)..">"..ret:sub(stats(c).max+2)
+	ret=ret:sub(0,stats(c).avg).."+"..ret:sub(stats(c).avg+2)
+	return ret
 end
 
 function col(s,n)

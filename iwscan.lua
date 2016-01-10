@@ -20,11 +20,7 @@ function statNum(c,t)
 end
 
 function stats(c)
-	local t={}
-	t["min"]=statNum(c,"min")
-	t["max"]=statNum(c,"max")
-	t["avg"]=math.floor(statNum(c,"sum")/(statNum(c,"count")))
-	return t
+	return {["min"]=statNum(c,"min"),["max"]=statNum(c,"max"),["avg"]=math.floor(statNum(c,"sum")/(statNum(c,"count")))}
 end
 
 function bar(c)
@@ -34,12 +30,13 @@ function bar(c)
 	local ret=""
 	ret=ret..e:rep(v)
 	ret=ret..n:rep(70-v)
+	--ret=string.rep("1234567890",10);ret=ret:sub(v)
 	local st=stats(c)
 	local zm=ret:sub(0,st.min)
-	local ma=ret:sub(st.min,st.avg)
-	local ax=ret:sub(st.avg,st.max)
-	local xe=ret:sub(st.max)
-	return zm..color.blue.."<"..ma.."+"..ax..">"..color.reset..xe
+	local ma=ret:sub(st.min+2,st.avg+1)
+	local ax=ret:sub(st.avg+3,st.max+2)
+	local xe=ret:sub(st.max+4)
+	return color.reset..zm..color.blue.."<"..ma.."+"..ax..">"..color.reset..xe
 end
 
 function col(s,n)

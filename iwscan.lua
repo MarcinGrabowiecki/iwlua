@@ -23,15 +23,15 @@ function stats(c)
 	local t={}
 	t["min"]=statNum(c,"min")
 	t["max"]=statNum(c,"max")
-	t["avg"]=math.floor(statNum(c,"sum")/(statNum(c,"count")+0.01))
+	t["avg"]=math.floor(statNum(c,"sum")/(statNum(c,"count")))
 	return t
 end
 
 function injectString(s,c)
 	local ret = s
-	ret=ret:sub(0,stats(c).avg).."+"..ret:sub(stats(c).avg+2)
 	ret=ret:sub(0,stats(c).min).."<"..ret:sub(stats(c).min+2)
 	ret=ret:sub(0,stats(c).max)..">"..ret:sub(stats(c).max+2)
+	ret=ret:sub(0,stats(c).avg).."+"..ret:sub(stats(c).avg+2)
 	return ret
 end
 
@@ -130,5 +130,6 @@ end
 
 for i=0,1000,1 do
 	proces()
+	os.execute("sleep 1")
 end
 

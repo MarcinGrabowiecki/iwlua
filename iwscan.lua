@@ -3,7 +3,7 @@ os.execute("reset")
 local ansiPrefix = string.char(27).."["
 --local goto00 = ansiPrefix.."0;0H"
 local goto00 = ansiPrefix.."H"
-local color={["reset"] = ansiPrefix.."0m",["red"] = ansiPrefix.."31m",["green"] = ansiPrefix.."32m"}
+local color={["reset"] = ansiPrefix.."0m",["red"] = ansiPrefix.."31m",["green"] = ansiPrefix.."32m",["yellow"]=ansiPrefix.."33m",["blue"]=ansiPrefix.."34m"}
 local clearLine = ansiPrefix.."2K"
 local stat={}
 local space="%s"
@@ -34,10 +34,12 @@ function bar(c)
 	local ret=""
 	ret=ret..e:rep(v)
 	ret=ret..n:rep(70-v)
-	ret=ret:sub(0,stats(c).min).."<"..ret:sub(stats(c).min+2)
-	ret=ret:sub(0,stats(c).max)..">"..ret:sub(stats(c).max+2)
-	ret=ret:sub(0,stats(c).avg).."+"..ret:sub(stats(c).avg+2)
-	return ret
+	local st=stats(c)
+	local zm=ret:sub(0,st.min)
+	local ma=ret:sub(st.min,st.avg)
+	local ax=ret:sub(st.avg,st.max)
+	local xe=ret:sub(st.max)
+	return zm..color.blue.."<"..ma.."+"..ax..">"..color.reset..xe
 end
 
 function col(s,n)

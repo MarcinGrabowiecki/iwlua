@@ -16,7 +16,6 @@ function add(k,v,tt)
 end	
 
 function bar(c)
-	--print(c.essid,c.address,c.avgQuality,c.minQuality)
 	local e="|"
 	local n = "."
 	local v = tonumber(c.quality)
@@ -50,6 +49,7 @@ function addWithStats(c,sn)
 			c.avgQuality=qu
 			c.minQuality=qu
 			c.maxQuality=qu
+			c.new=true
 		else
 			if c.quality==nil then exit(0) end
 			c.scanCount=1+allCells[c.address].scanCount
@@ -57,11 +57,11 @@ function addWithStats(c,sn)
 			c.avgQuality=math.floor(c.sumQuality/c.scanCount)
 			if allCells[c.address].maxQuality < qu then c.maxQuality=qu else c.maxQuality=allCells[c.address].maxQuality end
 			if allCells[c.address].minQuality > qu then c.minQuality=qu else c.minQuality=allCells[c.address].minQuality end
+			c.new=false
 		end
 		allCells[c.address]=c
 	end
 end
-
 
 function proces()
 	scanNum=scanNum+1
@@ -81,11 +81,6 @@ function proces()
 		add("quality",string.match(l,space:rep(20).."Quality=(%d+).*"),tt)
 		end
 		addWithStats(tt,scanNum)
-	--table.sort(r,function(a,b) return stats(a).avg>stats(b).avg end)
-	--table.sort(r,function(a,b) return a.quality>b.quality end)
-	--table.sort(r,function(a,b) return a.essid>b.essid end)	
-	--table.sort(allCells,function(a,b) return allCells[f].avgQuality>allCells[b].avgQuality end)
-
 	print(goto00)
 
 	toSort={}
@@ -96,13 +91,13 @@ function proces()
 
 	for i,c in pairs(toSort) do
 		local row=(col(i,3)..col(c.cellnum,3)..col(c.channel,3)..col(c.essid,18)..col(c.address,18)..col(c.quality,3)..bar(c))
-		if new then row=color.green..row..color.reset end
+		if c.new then row=color.green..row..color.reset end
 		if c.scanNum==scanNum then else row=color.red..row..color.reset end
-		print(row)
+		print(row,scanNum,c.scanNum)
 	end
 end
 
 for i=0,1000,1 do
 	proces()
-	--os.execute("sleep 1")
+	os.execute("sleep 1")
 end

@@ -10,9 +10,8 @@ local space="%s"
 local allCells={}
 local scanNum=0
 
-function add(k,v,tt)
-	if v==nil then return end
-	tt[k]=v
+function add(k,v,t)
+	if v==nil then return else t[k]=v end
 end	
 
 function bar(c)
@@ -41,22 +40,18 @@ end
 function addWithStats(c,sn)
 	if c.address==nil then else
 		local qu=tonumber(c.quality)
-		if allCells[c.address] == nil
+		local oc=allCells[c.address]
+		if oc == nil
 		then
-			c.firstScan=sn
-			c.scanCount=1
-			c.sumQuality=qu
-			c.avgQuality=qu
-			c.minQuality=qu
-			c.maxQuality=qu
+			c.firstScan,c.scanCount=sn,1
+			c.sumQuality,c.avgQuality,c.minQuality,c.maxQuality=qu,qu,qu,qu
 			c.new=true
 		else
-			if c.quality==nil then exit(0) end
 			c.scanCount=1+allCells[c.address].scanCount
-			c.sumQuality=c.quality+allCells[c.address].sumQuality
+			c.sumQuality=c.quality+oc.sumQuality
 			c.avgQuality=math.floor(c.sumQuality/c.scanCount)
-			if allCells[c.address].maxQuality < qu then c.maxQuality=qu else c.maxQuality=allCells[c.address].maxQuality end
-			if allCells[c.address].minQuality > qu then c.minQuality=qu else c.minQuality=allCells[c.address].minQuality end
+			if oc.maxQuality < qu then c.maxQuality=qu else c.maxQuality=oc.maxQuality end
+			if oc.minQuality > qu then c.minQuality=qu else c.minQuality=oc.minQuality end
 			c.new=false
 		end
 		allCells[c.address]=c
@@ -65,7 +60,7 @@ end
 
 function proces()
 	scanNum=scanNum+1
-	local proc = assert (io.popen ("`which iwlist` scan 2>/dev/null"))
+	local proc = assert(io.popen ("`which iwlist` scan 2>/dev/null"))
 	local tt={}
 	for l in proc:lines () do
 		cellnum,address = string.match(l,space:rep(10).."Cell (%d+)............(.*)")
@@ -79,21 +74,18 @@ function proces()
 		add("essid",string.match(l,space:rep(20).."ESSID:.(.*)."),tt)
 		add("channel",string.match(l,space:rep(20).."Channel:(%d+)"),tt)
 		add("quality",string.match(l,space:rep(20).."Quality=(%d+).*"),tt)
-		end
-		addWithStats(tt,scanNum)
+		add("seen",os.time(),tt)
+	end
+	addWithStats(tt,scanNum)
 	print(goto00)
-
 	toSort={}
-	for a,c in pairs(allCells) do
-		table.insert(toSort,c)
-	end	
-	table.sort(toSort,function(a,b) return a.quality>b.quality end)
-
+	for a,c in pairs(allCells) do table.insert(toSort,c) end	
+	table.sort(toSort,function(a,b) return a.avgQuality>b.avgQuality end)
 	for i,c in pairs(toSort) do
-		local row=(col(i,3)..col(c.cellnum,3)..col(c.channel,3)..col(c.essid,18)..col(c.address,18)..col(c.quality,3)..bar(c))
+		local row=(col(c.cellnum,3)..col(c.channel,3)..col(c.essid,18)..col(c.address,18)..col(c.quality,3)..bar(c))
 		if c.new then row=color.green..row..color.reset end
 		if c.scanNum==scanNum then else row=color.red..row..color.reset end
-		print(row,scanNum,c.scanNum)
+		print(row,os.time()-c.seen)
 	end
 end
 

@@ -1,4 +1,9 @@
 #!/usr/bin/env lua
+
+includes={
+	"00:26:F2:FF:8F:AF"
+}
+
 os.execute("reset")
 local ansiPrefix = string.char(27).."["
 --local goto00 = ansiPrefix.."0;0H"
@@ -58,6 +63,14 @@ function addWithStats(c,sn)
 	end
 end
 
+function indexOf(e,t)
+	local counter=0
+	for k,v in next,t do
+		if v==e then return counter end
+		counter=counter+1
+	end
+end
+
 function proces()
 	scanNum=scanNum+1
 	local proc = assert(io.popen ("`which iwlist` scan 2>/dev/null"))
@@ -86,10 +99,13 @@ function proces()
 		if c.new then row=color.green..row..color.reset end
 		if c.scanNum==scanNum then else row=color.red..row..color.reset end
 		print(row,os.time()-c.seen)
+		print(indexOf(c.address,includes))
 	end
 end
 
 for i=0,1000,1 do
 	proces()
 	os.execute("sleep 1")
+test={1,2,3}
+
 end

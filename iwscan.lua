@@ -1,7 +1,31 @@
 #!/usr/bin/env lua
 
 includes={
-	"00:26:F2:FF:8F:AF"
+	"00:26:F2:FF:8F:AF",
+	"02:71:CC:4D:B6:3F",
+	"E8:94:F6:5A:02:60",
+	"50:46:5D:BD:6B:DC",
+	"E8:DE:27:30:1A:C8",
+	"18:1E:78:AA:F6:79",
+	"10:BF:48:90:34:94",
+	"C0:4A:00:D3:FB:4C",
+	"D8:FE:E3:7B:87:44",
+	"14:CC:20:D1:50:12",
+	"64:7C:34:52:1C:F4",
+	"00:0E:8E:7F:24:97",
+	"64:7C:34:35:B9:33",
+	"00:12:2A:B1:21:58",
+	"FC:6F:B7:3D:2D:74",
+	"00:26:F2:FF:8F:AF",
+	"54:E2:E0:4E:FE:37",
+	"44:E9:DD:B4:96:26",
+	"00:12:2A:67:66:B8",
+	"64:7C:34:A8:42:B9",
+	"64:7C:34:47:BC:78",
+	"B0:48:7A:D4:72:0E",
+	"10:FE:ED:C8:05:A0",
+	"16:2D:27:28:DB:DB",
+	"64:7C:34:88:22:86"
 }
 
 os.execute("reset")
@@ -98,14 +122,12 @@ function proces()
 		local row=(col(c.cellnum,3)..col(c.channel,3)..col(c.essid,18)..col(c.address,18)..col(c.quality,3)..bar(c))
 		if c.new then row=color.green..row..color.reset end
 		if c.scanNum==scanNum then else row=color.red..row..color.reset end
-		print(row,os.time()-c.seen)
-		print(indexOf(c.address,includes))
+		if indexOf(c.address,includes) then print(row,os.time()-c.seen) end
+		
 	end
 end
 
 for i=0,1000,1 do
 	proces()
 	os.execute("sleep 1")
-test={1,2,3}
-
 end

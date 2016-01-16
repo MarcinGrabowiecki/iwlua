@@ -1,33 +1,5 @@
 #!/usr/bin/env lua
 
-includes={
-	"00:26:F2:FF:8F:AF",
-	"02:71:CC:4D:B6:3F",
-	"E8:94:F6:5A:02:60",
-	"50:46:5D:BD:6B:DC",
-	"E8:DE:27:30:1A:C8",
-	"18:1E:78:AA:F6:79",
-	"10:BF:48:90:34:94",
-	"C0:4A:00:D3:FB:4C",
-	"D8:FE:E3:7B:87:44",
-	"14:CC:20:D1:50:12",
-	"64:7C:34:52:1C:F4",
-	"00:0E:8E:7F:24:97",
-	"64:7C:34:35:B9:33",
-	"00:12:2A:B1:21:58",
-	"FC:6F:B7:3D:2D:74",
-	"00:26:F2:FF:8F:AF",
-	"54:E2:E0:4E:FE:37",
-	"44:E9:DD:B4:96:26",
-	"00:12:2A:67:66:B8",
-	"64:7C:34:A8:42:B9",
-	"64:7C:34:47:BC:78",
-	"B0:48:7A:D4:72:0E",
-	"10:FE:ED:C8:05:A0",
-	"16:2D:27:28:DB:DB",
-	"64:7C:34:88:22:86"
-}
-
 os.execute("reset")
 local ansiPrefix = string.char(27).."["
 --local goto00 = ansiPrefix.."0;0H"
@@ -38,6 +10,14 @@ local clearLine = ansiPrefix.."2K"
 local space="%s"
 local allCells={}
 local scanNum=0
+
+local includes={}
+
+local wsh = io.open ("wsh1")
+for l in wsh:lines () do
+	local ll = l:match("(.................)%s+")
+	if ll==nil then else table.insert(includes,ll) end
+end
 
 function add(k,v,t)
 	if v==nil then return else t[k]=v end
@@ -100,7 +80,7 @@ function proces()
 	local proc = assert(io.popen ("`which iwlist` scan 2>/dev/null"))
 	local tt={}
 	for l in proc:lines () do
-		cellnum,address = string.match(l,space:rep(10).."Cell (%d+)............(.*)")
+		cellnum,address = l:match(space:rep(10).."Cell (%d+)............(.*)")
 		if cellnum then
 			addWithStats(tt,scanNum)
 			tt={}
@@ -108,9 +88,9 @@ function proces()
 			add("address",address,tt)
 			add("scanNum",scanNum,tt)
 		end
-		add("essid",string.match(l,space:rep(20).."ESSID:.(.*)."),tt)
-		add("channel",string.match(l,space:rep(20).."Channel:(%d+)"),tt)
-		add("quality",string.match(l,space:rep(20).."Quality=(%d+).*"),tt)
+		add("essid",l:match(space:rep(20).."ESSID:.(.*)."),tt)
+		add("channel",l:match(space:rep(20).."Channel:(%d+)"),tt)
+		add("quality",l:match(space:rep(20).."Quality=(%d+).*"),tt)
 		add("seen",os.time(),tt)
 	end
 	addWithStats(tt,scanNum)
@@ -129,5 +109,5 @@ end
 
 for i=0,1000,1 do
 	proces()
-	os.execute("sleep 1")
+	os.execute("sleep 3")
 end

@@ -13,10 +13,11 @@ local scanNum=0
 
 local includes={}
 
-local wsh = io.open ("wsh1")
-for l in wsh:lines () do
-	local ll = l:match("(.................)%s+")
-	if ll==nil then else table.insert(includes,ll) end
+local wsh = io.open ("wsh")
+	if l then for l in wsh:lines () do
+		local ll = l:match("(.................)%s+")
+		if ll==nil then else table.insert(includes,ll) end
+	end
 end
 
 function add(k,v,t)
@@ -47,6 +48,7 @@ function ifNilVal(e,v)
 end
 
 function addWithStats(c,sn)
+	if(c.quality==nil) then return end
 	if c.address==nil then else
 		local qu=tonumber(c.quality)
 		local oc=allCells[c.address]
@@ -102,8 +104,7 @@ function proces()
 		local row=(col(c.cellnum,3)..col(c.channel,3)..col(c.essid,18)..col(c.address,18)..col(c.quality,3)..bar(c))
 		if c.new then row=color.green..row..color.reset end
 		if c.scanNum==scanNum then else row=color.red..row..color.reset end
-		if indexOf(c.address,includes) then print(row,os.time()-c.seen) end
-		
+		if #includes == 0 or indexOf(c.address,includes) then print(row,os.time()-c.seen) end	
 	end
 end
 

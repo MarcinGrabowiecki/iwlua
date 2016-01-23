@@ -14,7 +14,7 @@ local scanNum=0
 local includes={}
 
 local wsh = io.open ("wsh")
-	if l then for l in wsh:lines () do
+	if wsh then for l in wsh:lines () do
 		local ll = l:match("(.................)%s+")
 		if ll==nil then else table.insert(includes,ll) end
 	end
